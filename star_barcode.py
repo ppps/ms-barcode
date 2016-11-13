@@ -13,8 +13,9 @@ PRICES = [None, None, 1.0, 1.2]  # Indexed to price codes (0 & 1 not used)
 barcode_folder = Path('/Users/robjwells/Desktop/')
 prompt_for_folder = not barcode_folder.exists()
 
+
 def asrun(ascript):
-    "Run the given AppleScript and return the standard output and error."
+    "Run the given AppleScript and return the standard output"
     osa = subprocess.Popen(['/usr/bin/osascript', '-'],
                            stdin=subprocess.PIPE,
                            stdout=subprocess.PIPE,
