@@ -10,7 +10,7 @@ ISSN = '0307-1758'
 PRICE_CODES = [None, 2, 2, 2, 2, 2, 3, 2]  # Indexed to ISO weekday
 PRICES = [None, None, 1.0, 1.2]  # Indexed to price codes (0 & 1 not used)
 
-barcode_folder = Path('/Users/robjwells/Desktop/fakefolder')
+barcode_folder = Path('/Users/robjwells/Desktop/')
 prompt_for_folder = not barcode_folder.exists()
 
 def asrun(ascript):
@@ -86,7 +86,8 @@ prompt_ascript = '\n'.join([
 result = [s.strip() for s in asrun(prompt_ascript).decode().split(',')]
 sequence = int(result[0])
 week = int(result[1])
-barcode_folder = Path(result[2])
+if prompt_for_folder:
+    barcode_folder = Path(result[2])
 
 # TODO: This needs to go when 3.6 is released
 edition_date = iso_to_gregorian(iso_year, week, sequence % 10)
