@@ -51,7 +51,7 @@ class TestFilename(unittest.TestCase):
         name = star_barcode.barcode_filename(date, seq)
         self.assertEqual(
             name,
-            'Barcode_2016-W11-12_36.pdf'
+            'Barcode_2016-W45-6_36.pdf'
             )
 
     def test_wrong_sequence(self):
