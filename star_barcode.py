@@ -3,12 +3,15 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import subprocess
+import sys
 
 BWIPP = Path(__file__).resolve().parent.joinpath('bwipp', 'barcode.ps')
 ISSN = '0307-1758'
 PRICE_CODES = [None, 2, 2, 2, 2, 2, 3, 2]  # Indexed to ISO weekday
 PRICES = [None, None, 1.0, 1.2]  # Indexed to price codes (0 & 1 not used)
 
+barcode_folder = Path('/Users/robjwells/Desktop/fakefolder')
+prompt_for_folder = not barcode_folder.exists()
 
 def asrun(ascript):
     "Run the given AppleScript and return the standard output and error."
@@ -41,17 +44,56 @@ iso_year, iso_week, iso_day = tomorrow.isocalendar()
 # X is the price code, Y is the ISO day of the week
 sequence = (PRICE_CODES[iso_day] * 10) + iso_day
 
-# TODO: Prompt the user to confirm
-sequence = sequence
-iso_week = iso_week
-iso_year = iso_year  # Which year is the nearest Thursday in?
+
+prompt_ascript_main = '''\
+tell application "Finder"
+\tset sequence to display dialog ¬
+\t\t"Please confirm the edition sequence (price code & day number). Tomorrow is {d:%A}, day {d:%u} of the week." default answer ¬
+\t\t"{sequence}" buttons ¬
+\t\t{"Cancel", "OK"} default button ¬
+\t\t"OK" with title ¬
+\t\t"Barcode - Sequence"
+\t
+\tset week to display dialog ¬
+\t\t"Please confirm the week number for edition." & return & "Tomorrow is in week {d:%V}." default answer ¬
+\t\t"{d:%V}" buttons ¬
+\t\t{"Cancel", "OK"} default button ¬
+\t\t"OK" with title ¬
+\t\t"Barcode - Week"
+'''
+
+standard_end = '''\
+\tget {text returned of sequence, text returned of week}
+end tell
+'''
+
+folder_prompt_end = '''\
+\tdisplay dialog ¬
+\t\t"Can't find the default barcode folder, {directory}." buttons ¬
+\t\t{"Cancel", "Choose folder to save barcode"} default button ¬
+\t\t"Cancel"
+\tset save_folder to choose folder
+\t
+\tget {text returned of sequence, text returned of week, POSIX path of save_folder}
+end tell
+'''
+
+prompt_ascript = '\n'.join([
+    prompt_ascript_main,
+    folder_prompt_end if prompt_for_folder else standard_end
+    ]).encode()
+
+result = [s.strip() for s in asrun(prompt_ascript).decode().split(',')]
+sequence = int(result[0])
+week = int(result[1])
+barcode_folder = Path(result[2])
 
 # TODO: This needs to go when 3.6 is released
-edition_date = iso_to_gregorian(iso_year, iso_week, sequence % 10)
+edition_date = iso_to_gregorian(iso_year, week, sequence % 10)
 
 # TODO: Upgrade to Python 3.6 and use this version
 # edition_date = datetime.strptime(
-#    '{G}-W{V}-{u}'.format(G=iso_year, V=iso_week, u=sequence % 10),
+#    '{G}-W{V}-{u}'.format(G=iso_year, V=week, u=sequence % 10),
 #    '%G-W%V-%u'
 #    )
 
@@ -64,8 +106,8 @@ header_string = barcode_header(
     price=PRICES[sequence // 10]
     )
 
-issn_args = ' '.join([ISSN, str(sequence), str(iso_week)])
-barcode_file = Path(
+issn_args = ' '.join([ISSN, str(sequence), str(week)])
+barcode_file = barcode_folder.joinpath(
     'Barcode_{0}-W{1}-{2}_{3}.pdf'.format(
         *edition_date.isocalendar(),
         sequence
@@ -121,3 +163,4 @@ asrun(
     id_place_ascript.format(
         barcode_file=barcode_file.resolve()
         ).encode())
+
