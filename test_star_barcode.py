@@ -78,7 +78,7 @@ class TestFilename(unittest.TestCase):
         name = star_barcode.barcode_filename(date, seq)
         self.assertEqual(
             name,
-            'Barcode_2016-W52-7-27.pdf'
+            'Barcode_2016-W52-7_27.pdf'
             )
 
 
