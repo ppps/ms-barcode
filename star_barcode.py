@@ -31,140 +31,142 @@ def iso_year_start(iso_year):
     delta = timedelta(fourth_jan.isoweekday()-1)
     return fourth_jan - delta
 
+
 def iso_to_gregorian(iso_year, iso_week, iso_day):
     "Gregorian calendar date for the given ISO year, week and day"
     year_start = iso_year_start(iso_year)
     return year_start + timedelta(days=iso_day-1, weeks=iso_week-1)
 
 
-tomorrow = datetime.today() + timedelta(1)
-iso_year, iso_week, iso_day = tomorrow.isocalendar()
-
-# Sequence is a two-digit number: XY
-# X is the price code, Y is the ISO day of the week
-sequence = (PRICE_CODES[iso_day] * 10) + iso_day
-
-
-prompt_ascript_main = '''\
-tell application "Finder"
-\tset sequence to display dialog ¬
-\t\t"Please confirm the edition sequence (price code & day number). Tomorrow is {d:%A}, day {d:%u} of the week." default answer ¬
-\t\t"{sequence}" buttons ¬
-\t\t{{"Cancel", "OK"}} default button ¬
-\t\t"OK" with title ¬
-\t\t"Barcode - Sequence"
-\t
-\tset week to display dialog ¬
-\t\t"Please confirm the week number for edition." & return & "Tomorrow is in week {d:%V}." default answer ¬
-\t\t"{d:%V}" buttons ¬
-\t\t{{"Cancel", "OK"}} default button ¬
-\t\t"OK" with title ¬
-\t\t"Barcode - Week"
-'''
-
-standard_end = '''\
-\tget {text returned of sequence, text returned of week}
-end tell
-'''
-
-folder_prompt_end = '''\
-\tdisplay dialog ¬
-\t\t"Can't find the default barcode folder, {directory}." buttons ¬
-\t\t{{"Cancel", "Choose folder to save barcode"}} default button ¬
-\t\t"Cancel"
-\tset save_folder to choose folder
-\t
-\tget {text returned of sequence, text returned of week, POSIX path of save_folder}
-end tell
-'''
-
-prompt_ascript = '\n'.join([
-    prompt_ascript_main.format(sequence=sequence, d=tomorrow),
-    folder_prompt_end if prompt_for_folder else standard_end
-    ]).encode()
-
-result = asrun(prompt_ascript)
-if not result:
-    sys.exit()  ## User cancelled
-result = [s.strip() for s in result.decode().split(',')]
-sequence = int(result[0])
-week = int(result[1])
-if prompt_for_folder:
-    barcode_folder = Path(result[2])
-
-# TODO: This needs to go when 3.6 is released
-edition_date = iso_to_gregorian(iso_year, week, sequence % 10)
-
-# TODO: Upgrade to Python 3.6 and use this version
-# edition_date = datetime.strptime(
-#    '{G}-W{V}-{u}'.format(G=iso_year, V=week, u=sequence % 10),
-#    '%G-W%V-%u'
-#    )
-
 def barcode_header(date, price):
     template = 'MSTAR {date:%Y-%m-%d} {date:%a} {price:.1f}'
     return template.format(date=date, price=price).upper()
 
-header_string = barcode_header(
-    date=edition_date,
-    price=PRICES[sequence // 10]
-    )
 
-issn_args = ' '.join([ISSN, str(sequence), str(week)])
-barcode_file = barcode_folder.joinpath(
-    'Barcode_{0}-W{1}-{2}_{3}.pdf'.format(
-        *edition_date.isocalendar(),
-        sequence
+if __name__ == '__main__':
+    tomorrow = datetime.today() + timedelta(1)
+    iso_year, iso_week, iso_day = tomorrow.isocalendar()
+
+    # Sequence is a two-digit number: XY
+    # X is the price code, Y is the ISO day of the week
+    sequence = (PRICE_CODES[iso_day] * 10) + iso_day
+
+
+    prompt_ascript_main = '''\
+    tell application "Finder"
+    \tset sequence to display dialog ¬
+    \t\t"Please confirm the edition sequence (price code & day number). Tomorrow is {d:%A}, day {d:%u} of the week." default answer ¬
+    \t\t"{sequence}" buttons ¬
+    \t\t{{"Cancel", "OK"}} default button ¬
+    \t\t"OK" with title ¬
+    \t\t"Barcode - Sequence"
+    \t
+    \tset week to display dialog ¬
+    \t\t"Please confirm the week number for edition." & return & "Tomorrow is in week {d:%V}." default answer ¬
+    \t\t"{d:%V}" buttons ¬
+    \t\t{{"Cancel", "OK"}} default button ¬
+    \t\t"OK" with title ¬
+    \t\t"Barcode - Week"
+    '''
+
+    standard_end = '''\
+    \tget {text returned of sequence, text returned of week}
+    end tell
+    '''
+
+    folder_prompt_end = '''\
+    \tdisplay dialog ¬
+    \t\t"Can't find the default barcode folder, {directory}." buttons ¬
+    \t\t{{"Cancel", "Choose folder to save barcode"}} default button ¬
+    \t\t"Cancel"
+    \tset save_folder to choose folder
+    \t
+    \tget {text returned of sequence, text returned of week, POSIX path of save_folder}
+    end tell
+    '''
+
+    prompt_ascript = '\n'.join([
+        prompt_ascript_main.format(sequence=sequence, d=tomorrow),
+        folder_prompt_end if prompt_for_folder else standard_end
+        ]).encode()
+
+    result = asrun(prompt_ascript)
+    if not result:
+        sys.exit()  ## User cancelled
+    result = [s.strip() for s in result.decode().split(',')]
+    sequence = int(result[0])
+    week = int(result[1])
+    if prompt_for_folder:
+        barcode_folder = Path(result[2])
+
+    # TODO: This needs to go when 3.6 is released
+    edition_date = iso_to_gregorian(iso_year, week, sequence % 10)
+
+    # TODO: Upgrade to Python 3.6 and use this version
+    # edition_date = datetime.strptime(
+    #    '{G}-W{V}-{u}'.format(G=iso_year, V=week, u=sequence % 10),
+    #    '%G-W%V-%u'
+    #    )
+
+    header_string = barcode_header(
+        date=edition_date,
+        price=PRICES[sequence // 10]
         )
-    )
 
-postscript = '''\
-%!PS
-({bwipp_location}) run
-
-11 5 moveto ({issn_args}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
-
-% Print header line(s)
-/Courier findfont
-9 scalefont
-setfont
-
-newpath
-11 86 moveto
-({header}) show
-
-showpage
-'''
-
-gs_args = [
-    'gs',
-    '-sOutputFile={}'.format(barcode_file),
-    '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
-    '-sDEVICE=pdfwrite',
-    '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
-    '-'
-    ]
-
-with subprocess.Popen(gs_args, stdin=subprocess.PIPE) as proc:
-    proc.communicate(
-        postscript.format(
-            bwipp_location=BWIPP,
-            issn_args=issn_args,
-            header=header_string
-            ).encode()
+    issn_args = ' '.join([ISSN, str(sequence), str(week)])
+    barcode_file = barcode_folder.joinpath(
+        'Barcode_{0}-W{1}-{2}_{3}.pdf'.format(
+            *edition_date.isocalendar(),
+            sequence
+            )
         )
 
-id_place_ascript = '''\
-tell application "Adobe InDesign CS4"
-\ttell the active document
-\t\tplace POSIX file "{barcode_file}" on page item "Barcode"
-\t\tactivate
-\tend tell
-end tell
-'''
+    postscript = '''\
+    %!PS
+    ({bwipp_location}) run
 
-asrun(
-    id_place_ascript.format(
-        barcode_file=barcode_file.resolve()
-        ).encode())
+    11 5 moveto ({issn_args}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
 
+    % Print header line(s)
+    /Courier findfont
+    9 scalefont
+    setfont
+
+    newpath
+    11 86 moveto
+    ({header}) show
+
+    showpage
+    '''
+
+    gs_args = [
+        'gs',
+        '-sOutputFile={}'.format(barcode_file),
+        '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
+        '-sDEVICE=pdfwrite',
+        '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
+        '-'
+        ]
+
+    with subprocess.Popen(gs_args, stdin=subprocess.PIPE) as proc:
+        proc.communicate(
+            postscript.format(
+                bwipp_location=BWIPP,
+                issn_args=issn_args,
+                header=header_string
+                ).encode()
+            )
+
+    id_place_ascript = '''\
+    tell application "Adobe InDesign CS4"
+    \ttell the active document
+    \t\tplace POSIX file "{barcode_file}" on page item "Barcode"
+    \t\tactivate
+    \tend tell
+    end tell
+    '''
+
+    asrun(
+        id_place_ascript.format(
+            barcode_file=barcode_file.resolve()
+            ).encode())
