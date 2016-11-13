@@ -65,9 +65,11 @@ header_string = barcode_header(
     )
 
 issn_args = ' '.join([ISSN, str(sequence), str(iso_week)])
-barcode_file = 'Barcode_{0}-W{1}-{2}_{3}.pdf'.format(
-    *edition_date.isocalendar(),
-    sequence
+barcode_file = Path(
+    'Barcode_{0}-W{1}-{2}_{3}.pdf'.format(
+        *edition_date.isocalendar(),
+        sequence
+        )
     )
 
 postscript = '''\
@@ -106,6 +108,16 @@ with subprocess.Popen(gs_args, stdin=subprocess.PIPE) as proc:
             ).encode()
         )
 
-# AppleScript InDesign to place barcode file in barcode frame
-# in the active document.
-# Activate InDesign.
+id_place_ascript = '''\
+tell application "Adobe InDesign CS4"
+\ttell the active document
+\t\tplace POSIX file "{barcode_file}" on page item "Barcode"
+\t\tactivate
+\tend tell
+end tell
+'''
+
+asrun(
+    id_place_ascript.format(
+        barcode_file=barcode_file.resolve()
+        ).encode())
