@@ -43,6 +43,33 @@ def barcode_header(date, price):
     return template.format(date=date, price=price).upper()
 
 
+def barcode_filename(date, sequence):
+    """Produce a name (str) matching barcode date and sequence
+
+    date:       datetime object
+    sequence:   int, where:
+                    seq // 10 is the price code
+                    seq % 10 is the ISO weekday
+
+    Example output for 2016-11-14 and sequence 21:
+        Barcode_2016-W46-1_21.pdf
+
+    The format includes the ISO year, ISO week and ISO weekday
+    followed by the edition sequence (a price code followed by
+    the ISO weekday).
+
+    Raises ValueError if the final digit of sequence does
+    not match the ISO weekday of date.
+    """
+    if sequence % 10 != date.isocalendar()[2]:
+        msg = 'Sequence weekday does not match date: day {day} & seq {seq}'
+        msg = msg.format(day=date.isocalendar()[2], seq=sequence)
+        raise ValueError(msg)
+    name = 'Barcode_{d:%G}-W{d:%V}-{d:%u}_{seq}.pdf'.format(
+        d=date, seq=sequence)
+    return name
+
+
 if __name__ == '__main__':
     tomorrow = datetime.today() + timedelta(1)
     iso_year, iso_week, iso_day = tomorrow.isocalendar()
