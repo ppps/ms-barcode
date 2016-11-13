@@ -50,14 +50,14 @@ tell application "Finder"
 \tset sequence to display dialog ¬
 \t\t"Please confirm the edition sequence (price code & day number). Tomorrow is {d:%A}, day {d:%u} of the week." default answer ¬
 \t\t"{sequence}" buttons ¬
-\t\t{"Cancel", "OK"} default button ¬
+\t\t{{"Cancel", "OK"}} default button ¬
 \t\t"OK" with title ¬
 \t\t"Barcode - Sequence"
 \t
 \tset week to display dialog ¬
 \t\t"Please confirm the week number for edition." & return & "Tomorrow is in week {d:%V}." default answer ¬
 \t\t"{d:%V}" buttons ¬
-\t\t{"Cancel", "OK"} default button ¬
+\t\t{{"Cancel", "OK"}} default button ¬
 \t\t"OK" with title ¬
 \t\t"Barcode - Week"
 '''
@@ -70,7 +70,7 @@ end tell
 folder_prompt_end = '''\
 \tdisplay dialog ¬
 \t\t"Can't find the default barcode folder, {directory}." buttons ¬
-\t\t{"Cancel", "Choose folder to save barcode"} default button ¬
+\t\t{{"Cancel", "Choose folder to save barcode"}} default button ¬
 \t\t"Cancel"
 \tset save_folder to choose folder
 \t
@@ -79,11 +79,14 @@ end tell
 '''
 
 prompt_ascript = '\n'.join([
-    prompt_ascript_main,
+    prompt_ascript_main.format(sequence=sequence, d=tomorrow),
     folder_prompt_end if prompt_for_folder else standard_end
     ]).encode()
 
-result = [s.strip() for s in asrun(prompt_ascript).decode().split(',')]
+result = asrun(prompt_ascript)
+if not result:
+    sys.exit()  ## User cancelled
+result = [s.strip() for s in result.decode().split(',')]
 sequence = int(result[0])
 week = int(result[1])
 if prompt_for_folder:
