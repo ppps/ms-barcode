@@ -39,6 +39,19 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 
 def barcode_header(date, price):
+    """Format barcode header info line
+
+    date:   datetime object
+    price:  float
+
+    barcode_header takes a datetime object and a float,
+    representing the price and formats them as so:
+        MSTAR YYYY-MM-DD DAY P.p
+
+    Example:
+        MSTAR 2016-11-12 SAT 1.2
+
+    """
     template = 'MSTAR {date:%Y-%m-%d} {date:%a} {price:.1f}'
     return template.format(date=date, price=price).upper()
 
