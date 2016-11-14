@@ -316,7 +316,7 @@ showpage
             self.assertFalse(file_path.exists())
 
             star_barcode.create_barcode(
-                postscript=self.postcript,
+                postscript=self.postscript,
                 output_file=file_path)
 
             self.assertTrue(file_path.exists())
