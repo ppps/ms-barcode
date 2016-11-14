@@ -22,7 +22,7 @@ from docopt import docopt
 
 BWIPP = Path(__file__).resolve().parent.joinpath('bwipp', 'barcode.ps')
 ISSN = '0307-1758'
-PRICE_CODES = [None, 2, 2, 2, 2, 2, 3, 2]  # Indexed to ISO weekday
+PRICE_CODES = [2, 2, 2, 2, 2, 3, 2]
 PRICES = [None, None, 1.0, 1.2]  # Indexed to price codes (0 & 1 not used)
 
 
@@ -195,6 +195,59 @@ def process_arguments(arguments):
     return arguments
 
 
+def barcode_from_date(date, output_dir=None):
+    """Create a barcode from date and save to output_dir
+
+    Convenience wrapper around main.
+    """
+    barcode_args = [date.strftime('%Y-%m-%d')]
+    if output_dir is not None:
+        barcode_args.append('--directory=', str(output_dir))
+    return main(cli_args=barcode_args)
+
+
+def barcode_from_details(sequence, week, header, output_dir=None):
+    """Create a barcode by specifying the details directly
+
+    Convenience wrapper around main.
+    """
+    barcode_args = [sequence, week, header]
+    if output_dir is not None:
+        barcode_args.append('--directory=', str(output_dir))
+    return main(cli_args=barcode_args)
+
+
+def main(cli_args=sys.argv[1:]):
+    """Create barcode from command line args and return path to file"""
+    arguments = docopt(
+        doc=__doc__, argv=cli_args, version='Star Barcode 0.1.0')
+    arguments = process_arguments(arguments)
+
+    if arguments['<date>'] is not None:
+        date = arguments['<date>']
+        seq, week = date_to_sequence_and_week(
+            date=date, price_codes=PRICE_CODES)
+        header = barcode_header(
+            date=date, price=PRICES[seq // 10])
+        filename = barcode_filename(date=date, sequence=seq)
+    else:
+        seq = arguments['<seq>']
+        week = arguments['<week>']
+        header = arguments['<header>'].upper()
+        filename = 'Barcode_SPECIAL_{w}_{s}.pdf'.format(s=seq, w=week)
+
+    path = arguments['--directory'].joinpath(filename)
+
+    postscript = construct_postscript(
+        bwipp_location=BWIPP,
+        issn=ISSN,
+        sequence=seq,
+        week=week,
+        header_line=header)
+
+    create_barcode(postscript=postscript, output_file=path)
+    return path.resolve()
+
+
 if __name__ == '__main__':
-    arguments = docopt(__doc__, version='Star Barcode 0.1.0')
-    print(arguments)
+    print(main())
