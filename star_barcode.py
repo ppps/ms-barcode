@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -109,6 +110,57 @@ def date_to_sequence_and_week(date, price_codes):
     return (sequence, iso_week)
 
 
+def construct_postscript(*, bwipp_location, issn, sequence, week, header_line):
+    """Format a Postscript script ready for passing to ghostscript
+
+    bwipp_location:  pathlib.Path object for the BWIPP Postscript library
+    issn:            ISSN number, str matching regex \d{4}-\d{3,4}
+    sequence:        2-digit int, usually price code & ISO weekday
+    week:            ISO week number, as int
+    header_line:     str up to length 24, extra info printed above barcode
+    """
+    postscript = '''\
+%!PS
+({bwipp_location}) run
+
+11 5 moveto ({issn} {seq} {week:02}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
+
+% Print header line(s)
+/Courier findfont
+9 scalefont
+setfont
+
+newpath
+11 86 moveto
+({header}) show
+
+showpage
+'''
+    if not bwipp_location.exists():
+        raise ValueError('BWIPP location is incorrect')
+    else:
+        bwipp_location = bwipp_location.resolve()
+
+    if not re.match(r'^\d{4}-\d{3,4}$', issn):
+        raise ValueError('ISSN {0} is in incorrect format'.format(issn))
+
+    if not len(str(sequence)) == 2:
+        raise ValueError(
+            'Sequence {0} is not two digits long'.format(sequence))
+
+    if not 0 < week < 54:
+        raise ValueError(
+            'Week {0} is not a valid ISO week. Must be between 1 and 53'
+            .format(week))
+
+    return postscript.format(
+        bwipp_location=bwipp_location,
+        issn=issn,
+        seq=sequence,
+        week=week,
+        header=header_line)
+
+
 if __name__ == '__main__':
     tomorrow = datetime.today() + timedelta(1)
     iso_year, iso_week, iso_day = tomorrow.isocalendar()
@@ -144,24 +196,6 @@ if __name__ == '__main__':
             sequence
             )
         )
-
-    postscript = '''\
-    %!PS
-    ({bwipp_location}) run
-
-    11 5 moveto ({issn_args}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
-
-    % Print header line(s)
-    /Courier findfont
-    9 scalefont
-    setfont
-
-    newpath
-    11 86 moveto
-    ({header}) show
-
-    showpage
-    '''
 
     gs_args = [
         'gs',
