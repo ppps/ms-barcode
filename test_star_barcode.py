@@ -6,7 +6,7 @@ import unittest
 
 import star_barcode
 
-PROJECT_DIR = Path(__file__).resolve()
+PROJECT_DIR = Path(__file__).resolve().parent
 
 class TestHeader(unittest.TestCase):
     """Test barcode_header function for extra info line
@@ -218,7 +218,7 @@ class TestPostscript(unittest.TestCase):
         seq = 21
         week = 46
         header = 'MSTAR 2016-11-14 MON 1.0'
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, 'BWIPP'):
             star_barcode.construct_postscript(
                 bwipp_location=Path('/fake-path/not-here.ps'),
                 issn=self.issn,
@@ -239,7 +239,7 @@ class TestPostscript(unittest.TestCase):
         issns = ['0307-15', '0307-15789', '03071758', '0307175']
         for num in issns:
             with self.subTest(num=num):
-                with self.assertRaises(ValueError):
+                with self.assertRaisesRegex(ValueError, num):
                     star_barcode.construct_postscript(
                         issn=num,
                         bwipp_location=self.bwipp,
@@ -255,9 +255,10 @@ class TestPostscript(unittest.TestCase):
         is not checked here (in case there's some case in the future where
         we have to use an unusual sequence).
         """
-        with self.assertRaises(ValueError):
+        seq = 215
+        with self.assertRaisesRegex(ValueError, str(seq)):
             star_barcode.construct_postscript(
-                sequence=215,
+                sequence=seq,
                 bwipp_location=self.bwipp,
                 issn=self.issn,
                 week=46,
@@ -265,14 +266,14 @@ class TestPostscript(unittest.TestCase):
                 )
 
     def test_week_wrong(self):
-        """construct_postscript raises ValueError if 0 < week > 53
+        """construct_postscript raises ValueError if 0 < week < 54
 
         ISO weeks must be between 1 and 53.
         """
         weeks = [0, 54]
         for week in weeks:
             with self.subTest(week=week):
-                with self.assertRaises(ValueError):
+                with self.assertRaisesRegex(ValueError, str(week)):
                     star_barcode.construct_postscript(
                         week=week,
                         bwipp_location=self.bwipp,
