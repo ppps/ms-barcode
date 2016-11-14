@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
+import tempfile
 import unittest
 
 import star_barcode
@@ -282,6 +283,43 @@ class TestPostscript(unittest.TestCase):
                         sequence=21,
                         header_line=''
                         )
+
+
+class TestCreateBarcode(unittest.TestCase):
+    """Test create_barcode function, which calls ghostscript to make file"""
+    def setUp(self):
+        self.postscript = '''\
+%!PS
+(bwipp/barcode.ps) run
+
+11 5 moveto (0307-1758 25 45) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
+
+% Print header line(s)
+/Courier findfont
+9 scalefont
+setfont
+
+newpath
+11 86 moveto
+(MSTAR 2016-11-11 FRI 1.0) show
+
+showpage
+'''
+
+    def test_typical(self):
+        """Call create_barcode with typical values"""
+        with tempfile.TemporaryDirectory() as tempdir:
+            filename = 'test-barcode.pdf'
+            file_path = Path(tempdir, filename)
+
+            # Make sure it's not there by accident
+            self.assertFalse(file_path.exists())
+
+            star_barcode.create_barcode(
+                postscript=self.postcript,
+                output_file=file_path)
+
+            self.assertTrue(file_path.exists())
 
 
 if __name__ == '__main__':
