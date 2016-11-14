@@ -75,6 +75,40 @@ def barcode_filename(date, sequence):
     return name
 
 
+def date_to_sequence_and_week(date, price_codes):
+    """Return sequence code and ISO week number for date
+
+    Takes a datetime object and a list of integers representing price
+    codes and returns the two-digit ISSN sequence and ISO week number.
+
+    The sequence is a two-digit integer, where the first digit is the
+    price code and the second is the ISO weekday. For example, given
+    the sequence 21:
+        2 is the price code
+        1 is the ISO weekday
+
+    The list of price codes should be in order such that a code's
+    index in the list is equivalent to the ISO weekday - 1, ie:
+        Days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+
+    So given this list of price codes:
+        [1, 2, 3, 4, 5, 6, 7]
+    Monday has a price code of 1, through to Sunday with 7. Although
+    typically the price codes will have a certain amount of consistency.
+
+    The Morning Star's list as of 2016-11-14 looks like this:
+        [2, 2, 2, 2, 2, 3, 2]
+    Which has Monday-Friday as price code 2, and Saturday price code 3,
+    with Sunday (which is rare) price code 2 as with the working weekdays.
+
+    The price code list does not have to be of length 7, just long enough
+    to cover the weekday for the date supplied.
+    """
+    _, iso_week, iso_weekday = date.isocalendar()
+    sequence = price_codes[iso_weekday - 1] * 10 + iso_weekday
+    return (sequence, iso_week)
+
+
 if __name__ == '__main__':
     tomorrow = datetime.today() + timedelta(1)
     iso_year, iso_week, iso_day = tomorrow.isocalendar()
