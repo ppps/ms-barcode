@@ -14,15 +14,6 @@ barcode_folder = Path('/Users/robjwells/Desktop/')
 prompt_for_folder = not barcode_folder.exists()
 
 
-def asrun(ascript):
-    "Run the given AppleScript and return the standard output"
-    osa = subprocess.Popen(['/usr/bin/osascript', '-'],
-                           stdin=subprocess.PIPE,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.DEVNULL)
-    return osa.communicate(ascript)[0]
-
-
 # This borrowed from http://stackoverflow.com/questions/304256
 # while we wait for Python to introduce ISO year, week and day
 # directives, which are coming at the end of 2016 in 3.6.
@@ -92,48 +83,6 @@ if __name__ == '__main__':
     # X is the price code, Y is the ISO day of the week
     sequence = (PRICE_CODES[iso_day] * 10) + iso_day
 
-
-    prompt_ascript_main = '''\
-    tell application "Finder"
-    \tset sequence to display dialog ¬
-    \t\t"Please confirm the edition sequence (price code & day number). Tomorrow is {d:%A}, day {d:%u} of the week." default answer ¬
-    \t\t"{sequence}" buttons ¬
-    \t\t{{"Cancel", "OK"}} default button ¬
-    \t\t"OK" with title ¬
-    \t\t"Barcode - Sequence"
-    \t
-    \tset week to display dialog ¬
-    \t\t"Please confirm the week number for edition." & return & "Tomorrow is in week {d:%V}." default answer ¬
-    \t\t"{d:%V}" buttons ¬
-    \t\t{{"Cancel", "OK"}} default button ¬
-    \t\t"OK" with title ¬
-    \t\t"Barcode - Week"
-    '''
-
-    standard_end = '''\
-    \tget {text returned of sequence, text returned of week}
-    end tell
-    '''
-
-    folder_prompt_end = '''\
-    \tdisplay dialog ¬
-    \t\t"Can't find the default barcode folder, {directory}." buttons ¬
-    \t\t{{"Cancel", "Choose folder to save barcode"}} default button ¬
-    \t\t"Cancel"
-    \tset save_folder to choose folder
-    \t
-    \tget {text returned of sequence, text returned of week, POSIX path of save_folder}
-    end tell
-    '''
-
-    prompt_ascript = '\n'.join([
-        prompt_ascript_main.format(sequence=sequence, d=tomorrow),
-        folder_prompt_end if prompt_for_folder else standard_end
-        ]).encode()
-
-    result = asrun(prompt_ascript)
-    if not result:
-        sys.exit()  ## User cancelled
     result = [s.strip() for s in result.decode().split(',')]
     sequence = int(result[0])
     week = int(result[1])
@@ -197,17 +146,3 @@ if __name__ == '__main__':
                 header=header_string
                 ).encode()
             )
-
-    id_place_ascript = '''\
-    tell application "Adobe InDesign CS4"
-    \ttell the active document
-    \t\tplace POSIX file "{barcode_file}" on page item "Barcode"
-    \t\tactivate
-    \tend tell
-    end tell
-    '''
-
-    asrun(
-        id_place_ascript.format(
-            barcode_file=barcode_file.resolve()
-            ).encode())
