@@ -1,4 +1,5 @@
-set barcode_script_location to "/Users/robjwells/Projects/star-barcode/star_barcode.py"
+set barcode_script to "/usr/local/bin/python3 /Users/robjwells/Projects/star-barcode/star_barcode.py"
+set barcode_save_dir to "/Users/robjwells/Desktop/"
 
 set barcode_options to {"Tomorrow", "Another date", "Special sequence"}
 set default_barcode to {"Tomorrow"}
@@ -14,13 +15,15 @@ if barcode_choice is in {"Tomorrow", "Another date"} then
     else
         set edition_date to do shell script "date -jv+1d +%Y-%m-%d"
     end if
-    set barcode_command to (barcode_script_location & " " & edition_date)
+    set barcode_command to (barcode_script & " " & edition_date)
 else if barcode_choice is "Special sequence" then
     set barcode_sequence to text returned of (display dialog "Please enter the barcode sequence:" default answer "")
     set barcode_week to text returned of (display dialog "Please enter the barcode week number:" default answer "")
     set barcode_header to text returned of (display dialog "Please enter the barcode header line (24 characters maximum):" default answer "")
-    set barcode_command to (barcode_script_location & " direct --seq " & barcode_sequence & " --week " & barcode_week & " --header '" & barcode_header & "'")
+    set barcode_command to (barcode_script & " " & barcode_sequence & " " & barcode_week & " '" & barcode_header & "'")
 end if
+
+set barcode_command to (barcode_command & " --directory=" & barcode_save_dir)
 
 set barcode_file_location to ((do shell script barcode_command) as POSIX file)
 
