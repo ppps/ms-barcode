@@ -197,7 +197,7 @@ class TestPostscript(unittest.TestCase):
         week = 46
         header = 'MSTAR 2016-11-14 MON 1.0'
         issn_args = ' '.join([self.issn, str(seq), str(week)])
-        result = star_barcode.construct_postcript(
+        result = star_barcode.construct_postscript(
             bwipp_location=self.bwipp,
             issn=self.issn,
             sequence=seq,
@@ -211,7 +211,7 @@ class TestPostscript(unittest.TestCase):
     def test_missing_bwipp(self):
         """construct_postscript raises ValueError if bwipp is missing
 
-        If the location passed to construct_postcript for the location
+        If the location passed to construct_postscript for the location
         of the bwipp postscript library does not exist, then it should
         raise ValueError.
         """
@@ -219,7 +219,7 @@ class TestPostscript(unittest.TestCase):
         week = 46
         header = 'MSTAR 2016-11-14 MON 1.0'
         with self.assertRaises(ValueError):
-            star_barcode.construct_postcript(
+            star_barcode.construct_postscript(
                 bwipp=Path('/fake-path/not-here.ps'),
                 issn=self.issn,
                 sequence=seq,
@@ -228,19 +228,19 @@ class TestPostscript(unittest.TestCase):
                 )
 
     def test_issn_incorrect_length(self):
-        """construct_postcript raises ValueError for ISSN of incorrect length
+        """construct_postscript raises ValueError for ISSN of incorrect length
 
         ISSNs are either 7 or 8 digits long (8 being the optional check
         digit), with a mandatory (for BWIPP) hyphen in the fifth place.
 
-        construct_postcript should raise a ValueError if the ISSN is
+        construct_postscript should raise a ValueError if the ISSN is
         not of the form \d{4}-\d{3,4}.
         """
         issns = ['0307-15', '0307-15789', '03071758', '0307175']
         for num in issns:
             with self.subTest(num=num):
                 with self.assertRaises(ValueError):
-                    star_barcode.construct_postcript(
+                    star_barcode.construct_postscript(
                         issn=num,
                         bwipp=self.bwipp,
                         sequence=21,
@@ -249,14 +249,14 @@ class TestPostscript(unittest.TestCase):
                         )
 
     def test_sequence_wrong(self):
-        """construct_postcript raises ValueError if sequence is not 2 digits
+        """construct_postscript raises ValueError if sequence is not 2 digits
 
         The second digit of the sequence should be the ISO date but this
         is not checked here (in case there's some case in the future where
         we have to use an unusual sequence).
         """
         with self.assertRaises(ValueError):
-            star_barcode.construct_postcript(
+            star_barcode.construct_postscript(
                 sequence=215,
                 bwipp=self.bwipp,
                 issn=self.issn,
@@ -265,13 +265,13 @@ class TestPostscript(unittest.TestCase):
                 )
 
     def test_week_wrong(self):
-        """construct_postcript raises ValueError if week is not 2 digits
+        """construct_postscript raises ValueError if week is not 2 digits
 
         An ISSN can have a five-digit add on, but that's outside our
         usage and so excluded here. Only two-digit weeks are allowed.
         """
         with self.assertRaises(ValueError):
-            star_barcode.construct_postcript(
+            star_barcode.construct_postscript(
                 week=466,
                 bwipp=self.bwipp,
                 issn=self.issn,
