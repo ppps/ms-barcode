@@ -8,6 +8,7 @@ import star_barcode
 
 PROJECT_DIR = Path(__file__).resolve().parent
 
+
 class TestHeader(unittest.TestCase):
     """Test barcode_header function for extra info line
 
@@ -281,8 +282,6 @@ class TestPostscript(unittest.TestCase):
                         sequence=21,
                         header_line=''
                         )
-
-
 
 
 if __name__ == '__main__':
