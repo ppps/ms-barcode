@@ -322,5 +322,55 @@ showpage
             self.assertTrue(file_path.exists())
 
 
+class TestProcessArguments(unittest.TestCase):
+    """Test process_arguments function
+
+    process_arguments turns arguments returned by docopt into
+    the appropriate types for other functions to use.
+    """
+
+    def test_date_only(self):
+        """process_arguments turns date into datetime"""
+        args = {
+            '--directory': './',
+            '<date>': '2016-11-15',
+            '<header>': None,
+            '<seq>': None,
+            '<week>': None
+            }
+        expected = {
+            '--directory': Path('./'),
+            '<date>': datetime(2016, 11, 15),
+            '<header>': None,
+            '<seq>': None,
+            '<week>': None
+            }
+        self.assertEqual(
+            star_barcode.process_arguments(args),
+            expected
+            )
+
+    def test_seq_week_header(self):
+        """process_arguments turns date into datetime"""
+        args = {
+            '--directory': './',
+            '<date>': None,
+            '<header>': 'Header line',
+            '<seq>': '22',
+            '<week>': '46'
+            }
+        expected = {
+            '--directory': Path('./'),
+            '<date>': None,
+            '<header>': 'Header line',
+            '<seq>': 22,
+            '<week>': 46
+            }
+        self.assertEqual(
+            star_barcode.process_arguments(args),
+            expected
+            )
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
