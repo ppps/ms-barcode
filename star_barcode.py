@@ -180,6 +180,21 @@ def create_barcode(postscript, output_file):
         proc.communicate(postscript.encode())
 
 
+def process_arguments(arguments):
+    """Return arguments dict with types converted"""
+    if arguments['<date>'] is not None:
+        arguments['<date>'] = datetime.strptime(arguments['<date>'],
+                                                '%Y-%m-%d')
+
+    arguments['--directory'] = Path(arguments['--directory'])
+
+    for key in ['<seq>', '<week>']:
+        if arguments[key] is not None:
+            arguments[key] = int(arguments[key])
+
+    return arguments
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='Star Barcode 0.1.0')
     print(arguments)
