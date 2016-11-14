@@ -1,10 +1,24 @@
 #!/usr/bin/env python3
+"""Star Barcode
+
+Usage:
+  star_barcode.py (<date> | <seq> <week> <header>) [--directory=<dir>]
+
+Options:
+  -d=<dir>, --directory=<dir>  Where to save the barcode [default: ./]
+  -h, --help                   Display this message
+  --version                    Display version
+
+"""
+
 
 from datetime import datetime, timedelta
 from pathlib import Path
 import re
 import subprocess
 import sys
+
+from docopt import docopt
 
 BWIPP = Path(__file__).resolve().parent.joinpath('bwipp', 'barcode.ps')
 ISSN = '0307-1758'
@@ -167,7 +181,5 @@ def create_barcode(postscript, output_file):
 
 
 if __name__ == '__main__':
-    header_string = barcode_header(
-        date=edition_date,
-        price=PRICES[sequence // 10]
-        )
+    arguments = docopt(__doc__, version='Star Barcode 0.1.0')
+    print(arguments)
