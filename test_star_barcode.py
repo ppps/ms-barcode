@@ -1,10 +1,12 @@
 #!/usr/local/bin/python3
 
 from datetime import datetime, timedelta
+from pathlib import Path
 import unittest
 
 import star_barcode
 
+PROJECT_DIR = Path(__file__).resolve()
 
 class TestHeader(unittest.TestCase):
     """Test barcode_header function for extra info line
@@ -181,6 +183,103 @@ class TestDateToSequenceWeek(unittest.TestCase):
                         date + timedelta(i), prices),
                     ((i + 1) * 11, week)
                     )
+
+
+class TestPostscript(unittest.TestCase):
+    """Test the formatting of the Postscript commands"""
+    def setUp(self):
+        self.bwipp = PROJECT_DIR.joinpath('bwipp', 'barcode.ps')
+        self.issn = '0307-1758'
+
+    def test_typical(self):
+        """construct_postscript correctly formats typical arguments"""
+        seq = 21
+        week = 46
+        header = 'MSTAR 2016-11-14 MON 1.0'
+        issn_args = ' '.join([self.issn, str(seq), str(week)])
+        result = star_barcode.construct_postcript(
+            bwipp_location=self.bwipp,
+            issn=self.issn,
+            sequence=seq,
+            week=week,
+            header_line=header
+            )
+        self.assertGreater(result.find(str(self.bwipp)), -1)
+        self.assertGreater(result.find(issn_args), -1)
+        self.assertGreater(result.find(header), -1)
+
+    def test_missing_bwipp(self):
+        """construct_postscript raises ValueError if bwipp is missing
+
+        If the location passed to construct_postcript for the location
+        of the bwipp postscript library does not exist, then it should
+        raise ValueError.
+        """
+        seq = 21
+        week = 46
+        header = 'MSTAR 2016-11-14 MON 1.0'
+        with self.assertRaises(ValueError):
+            star_barcode.construct_postcript(
+                bwipp=Path('/fake-path/not-here.ps'),
+                issn=self.issn,
+                sequence=seq,
+                week=week,
+                header_line=header
+                )
+
+    def test_issn_incorrect_length(self):
+        """construct_postcript raises ValueError for ISSN of incorrect length
+
+        ISSNs are either 7 or 8 digits long (8 being the optional check
+        digit), with a mandatory (for BWIPP) hyphen in the fifth place.
+
+        construct_postcript should raise a ValueError if the ISSN is
+        not of the form \d{4}-\d{3,4}.
+        """
+        issns = ['0307-15', '0307-15789', '03071758', '0307175']
+        for num in issns:
+            with self.subTest(num=num):
+                with self.assertRaises(ValueError):
+                    star_barcode.construct_postcript(
+                        issn=num,
+                        bwipp=self.bwipp,
+                        sequence=21,
+                        week=46,
+                        header_line=''
+                        )
+
+    def test_sequence_wrong(self):
+        """construct_postcript raises ValueError if sequence is not 2 digits
+
+        The second digit of the sequence should be the ISO date but this
+        is not checked here (in case there's some case in the future where
+        we have to use an unusual sequence).
+        """
+        with self.assertRaises(ValueError):
+            star_barcode.construct_postcript(
+                sequence=215,
+                bwipp=self.bwipp,
+                issn=self.issn,
+                week=46,
+                header_line=''
+                )
+
+    def test_week_wrong(self):
+        """construct_postcript raises ValueError if week is not 2 digits
+
+        An ISSN can have a five-digit add on, but that's outside our
+        usage and so excluded here. Only two-digit weeks are allowed.
+        """
+        with self.assertRaises(ValueError):
+            star_barcode.construct_postcript(
+                week=466,
+                bwipp=self.bwipp,
+                issn=self.issn,
+                sequence=21,
+                header_line=''
+                )
+
+
 
 
 if __name__ == '__main__':
