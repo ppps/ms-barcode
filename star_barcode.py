@@ -142,26 +142,32 @@ showpage
         header=header_line)
 
 
-if __name__ == '__main__':
-    header_string = barcode_header(
-        date=edition_date,
-        price=PRICES[sequence // 10]
-        )
+def create_barcode(postscript, output_file):
+    """Save barcode file to output_file from postscript
 
+    postscript:     str, a formatted PostScript script
+
+    output_file:    pathlib.Path or str
+
+    output_file is formatted into a str, so can be any class that
+    produces a Unix path on str().
+
+    Calls ghostscript behind the scenes using subprocess.
+    """
     gs_args = [
         'gs',
-        '-sOutputFile={}'.format(barcode_file),
+        '-sOutputFile={}'.format(output_file),
         '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
         '-sDEVICE=pdfwrite',
         '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
         '-'
         ]
-
     with subprocess.Popen(gs_args, stdin=subprocess.PIPE) as proc:
-        proc.communicate(
-            postscript.format(
-                bwipp_location=BWIPP,
-                issn_args=issn_args,
-                header=header_string
-                ).encode()
-            )
+        proc.communicate(postscript.encode())
+
+
+if __name__ == '__main__':
+    header_string = barcode_header(
+        date=edition_date,
+        price=PRICES[sequence // 10]
+        )
