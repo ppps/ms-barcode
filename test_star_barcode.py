@@ -220,7 +220,7 @@ class TestPostscript(unittest.TestCase):
         header = 'MSTAR 2016-11-14 MON 1.0'
         with self.assertRaises(ValueError):
             star_barcode.construct_postscript(
-                bwipp=Path('/fake-path/not-here.ps'),
+                bwipp_location=Path('/fake-path/not-here.ps'),
                 issn=self.issn,
                 sequence=seq,
                 week=week,
@@ -242,7 +242,7 @@ class TestPostscript(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     star_barcode.construct_postscript(
                         issn=num,
-                        bwipp=self.bwipp,
+                        bwipp_location=self.bwipp,
                         sequence=21,
                         week=46,
                         header_line=''
@@ -258,26 +258,28 @@ class TestPostscript(unittest.TestCase):
         with self.assertRaises(ValueError):
             star_barcode.construct_postscript(
                 sequence=215,
-                bwipp=self.bwipp,
+                bwipp_location=self.bwipp,
                 issn=self.issn,
                 week=46,
                 header_line=''
                 )
 
     def test_week_wrong(self):
-        """construct_postscript raises ValueError if week is not 2 digits
+        """construct_postscript raises ValueError if 0 < week > 53
 
-        An ISSN can have a five-digit add on, but that's outside our
-        usage and so excluded here. Only two-digit weeks are allowed.
+        ISO weeks must be between 1 and 53.
         """
-        with self.assertRaises(ValueError):
-            star_barcode.construct_postscript(
-                week=466,
-                bwipp=self.bwipp,
-                issn=self.issn,
-                sequence=21,
-                header_line=''
-                )
+        weeks = [0, 54]
+        for week in weeks:
+            with self.subTest(week=week):
+                with self.assertRaises(ValueError):
+                    star_barcode.construct_postscript(
+                        week=week,
+                        bwipp_location=self.bwipp,
+                        issn=self.issn,
+                        sequence=21,
+                        header_line=''
+                        )
 
 
 
