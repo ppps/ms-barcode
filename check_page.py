@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
+from pathlib import Path
 import re
+import sys
 
 import star_barcode
 
@@ -35,5 +37,12 @@ formatted_html = html_template.format(
     week=week,
     tablerows=''.join(table_rows))
 
-with open('index.html', mode='w', encoding='utf-8') as index_file:
+try:
+    directory = Path(sys.argv[1]).resolve()
+except IndexError:
+    directory = Path('./').resolve()
+
+index_path = str(directory.joinpath('index.html'))
+
+with open(index_path, mode='w', encoding='utf-8') as index_file:
     index_file.write(formatted_html)
