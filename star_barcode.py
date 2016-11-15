@@ -186,7 +186,7 @@ def process_arguments(arguments):
         arguments['<date>'] = datetime.strptime(arguments['<date>'],
                                                 '%Y-%m-%d')
 
-    arguments['--directory'] = Path(arguments['--directory'])
+    arguments['--directory'] = Path(arguments['--directory']).expanduser()
 
     for key in ['<seq>', '<week>']:
         if arguments[key] is not None:
