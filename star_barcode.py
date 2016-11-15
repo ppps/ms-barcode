@@ -5,7 +5,7 @@ Usage:
   star_barcode.py (<date> | <seq> <week> <header>) [--directory=<dir>]
 
 Options:
-  -d=<dir>, --directory=<dir>  Where to save the barcode [default: ./]
+  -d <dir>, --directory=<dir>  Where to save the barcode [default: ./]
   -h, --help                   Display this message
   --version                    Display version
 
