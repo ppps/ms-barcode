@@ -1,0 +1,49 @@
+body {
+  background-color: #607080;
+  font-family: 'Myriad Pro', 'MyriadPro-Regular', 'Georgia', serif;
+  font-size: 120%;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5rem;
+}
+
+.wrapper {
+  background-color: #F7F8F9;
+  margin: 0 auto;
+  max-width: 65rem;   /* 1040 */
+  min-height: 100vh;
+  padding: 1.375rem 1rem;   /* 22 | 16 */
+}
+
+section {
+  padding: 1rem 2rem;
+  min-width: 10rem;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+thead {
+  border-bottom: 1px solid #607080;
+}
+
+th,
+td {
+  width: auto;
+  padding: 0.6875rem;
+  overflow: auto;
+}
+
+th {
+  background-color: #EFF0F2;
+  font-weight: bold;
+  text-align: left;
+}
+
+@media screen and (min-width: 50rem) {
+  .wrapper {
+    display: flex;
+  }
+}

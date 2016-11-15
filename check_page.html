@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Morning Star barcode check page</title>
+  <link href="check_page.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="wrapper">
+
+<section id="main">
+<h1>Morning Star barcode check page</h1>
+
+<p>Tomorrow is {date:%A %B %-d %Y}. This is tomorrow’s barcode (you can download and place it in InDesign if you need to):</p>
+
+<embed src="/Users/robjwells/Desktop/Barcode_2016-W46-3_23.pdf"
+       width="500" height="400">
+
+<p>The <b>sequence</b> is <b>{sequence}</b>, which appears on the bottom between <code>9 770307 175</code> and the final digit.</p>
+
+<p> The <b>week</b> is <b>{week}</b>, which appears in the top-right above the smaller barcode.<p>
+
+Please double-check the week number against this list:
+
+<table>
+  <thead>
+    <tr>
+      <th>Week number</th>
+      <th>Commences on (Monday)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {tablerows}
+  </tbody>
+</table>
+
+
+</section>
+
+<section id="sidebar">
+<p><i>NOTE: If tomorrow has an unusual price or is strange in some way, a special barcode might apply. This is almost NEVER the case, though.</i></p>
+</section>
+
+</div>
+</body>
+
+</html>
+
