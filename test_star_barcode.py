@@ -96,8 +96,9 @@ class TestFilename(unittest.TestCase):
         only with a corresponding date, and ISO weekdays run 1-7.
         Special-case sequences 00, 98 and 99 are not considered here.
         """
-        start_date = datetime(2016, 11, 13)  # Note this is a Sunday, and
-                                       # must have timedelta added
+        start_date = datetime(2016, 11, 13)
+        # Note this is a Sunday, and must have timedelta added
+
         for x in range(1, 7):
             with self.subTest(x=x):
                 date = start_date + timedelta(x)
@@ -350,7 +351,6 @@ class TestPostscript(unittest.TestCase):
                     -1
                     )
 
-
     def test_week_wrong(self):
         """construct_postscript raises ValueError if 0 < week < 54
 
@@ -386,6 +386,7 @@ class TestPostscript(unittest.TestCase):
                         self.issn, seq, week)),
                     -1
                     )
+
 
 class TestCreateBarcode(unittest.TestCase):
     """Test create_barcode function, which calls ghostscript to make file"""
