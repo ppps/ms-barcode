@@ -66,7 +66,7 @@ def barcode_filename(date, sequence):
         msg = 'Sequence weekday does not match date: day {day} & seq {seq}'
         msg = msg.format(day=date.isocalendar()[2], seq=sequence)
         raise ValueError(msg)
-    name = 'Barcode_{d:%G}-W{d:%V}-{d:%u}_{seq}.pdf'.format(
+    name = 'Barcode_{d:%G}-W{d:%V}-{d:%u}_{seq:02}.pdf'.format(
         d=date, seq=sequence)
     return name
 
@@ -118,7 +118,7 @@ def construct_postscript(*, bwipp_location, issn, sequence, week, header_line):
 %!PS
 ({bwipp_location}) run
 
-11 5 moveto ({issn} {seq} {week:02}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
+11 5 moveto ({issn} {seq:02} {week:02}) (includetext height=1.07) /issn /uk.co.terryburton.bwipp findresource exec
 
 % Print header line(s)
 /Courier findfont
@@ -139,9 +139,9 @@ showpage
     if not re.match(r'^\d{4}-\d{3,4}$', issn):
         raise ValueError('ISSN {0} is in incorrect format'.format(issn))
 
-    if not len(str(sequence)) == 2:
+    if not 0 <= sequence <= 99:
         raise ValueError(
-            'Sequence {0} is not two digits long'.format(sequence))
+            'Sequence {0} is outside of range 0-99'.format(sequence))
 
     if not 0 < week < 54:
         raise ValueError(
