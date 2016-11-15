@@ -169,7 +169,7 @@ def create_barcode(postscript, output_file):
     Calls ghostscript behind the scenes using subprocess.
     """
     gs_args = [
-        '/usr/local/bin/gs',
+        'gs',
         '-sOutputFile={}'.format(output_file),
         '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
         '-sDEVICE=pdfwrite',
