@@ -234,7 +234,7 @@ def main(cli_args=sys.argv[1:]):
         seq = arguments['<seq>']
         week = arguments['<week>']
         header = arguments['<header>'].upper()
-        filename = 'Barcode_SPECIAL_{w}_{s}.pdf'.format(s=seq, w=week)
+        filename = 'Barcode_SPECIAL_W{w:02}_{s:02}.pdf'.format(s=seq, w=week)
 
     path = arguments['--directory'].joinpath(filename)
 
