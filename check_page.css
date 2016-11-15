@@ -42,7 +42,11 @@ th {
   text-align: left;
 }
 
-#sidebar table th, td {
+embed {
+    max-width: 100%;
+}
+
+#sidebar table th, #sidebar table td {
     padding: 0.25rem;
 }
 
