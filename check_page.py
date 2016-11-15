@@ -39,7 +39,7 @@ with open('check_page.html', encoding='utf-8') as template_file:
 
 formatted_html = html_template.format(
     date=tomorrow,
-    barcodepath=barcode_path,
+    barcodepath=barcode_path.name,
     sequence=sequence,
     week=week,
     tablerows=''.join(table_rows))
