@@ -205,7 +205,7 @@ def barcode_from_date(date, output_dir=None):
     """
     barcode_args = [date.strftime('%Y-%m-%d')]
     if output_dir is not None:
-        barcode_args.append('--directory=', str(output_dir))
+        barcode_args.append('--directory=' + str(output_dir))
     return main(cli_args=barcode_args)
 
 
@@ -216,7 +216,7 @@ def barcode_from_details(sequence, week, header, output_dir=None):
     """
     barcode_args = [sequence, week, header]
     if output_dir is not None:
-        barcode_args.append('--directory=', str(output_dir))
+        barcode_args.append('--directory=' + str(output_dir))
     return main(cli_args=barcode_args)
 
 
