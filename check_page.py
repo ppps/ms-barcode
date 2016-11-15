@@ -7,9 +7,15 @@ import sys
 
 import star_barcode
 
+try:
+    directory = Path(sys.argv[1]).resolve()
+except IndexError:
+    directory = Path('./').resolve()
+
 tomorrow = datetime.today() + timedelta(1)
 
-barcode_path = star_barcode.barcode_from_date(tomorrow)
+barcode_path = star_barcode.barcode_from_date(
+    date=tomorrow, output_dir=directory)
 week, sequence = re.search(r'Barcode_\d{4}-W(\d{2})-\d{1}_(\d{2}).pdf',
                            'Barcode_2016-W46-3_23.pdf').groups()
 
@@ -33,16 +39,12 @@ with open('check_page.html', encoding='utf-8') as template_file:
 
 formatted_html = html_template.format(
     date=tomorrow,
+    barcodepath=barcode_path,
     sequence=sequence,
     week=week,
     tablerows=''.join(table_rows))
 
-try:
-    directory = Path(sys.argv[1]).resolve()
-except IndexError:
-    directory = Path('./').resolve()
 
 index_path = str(directory.joinpath('index.html'))
-
 with open(index_path, mode='w', encoding='utf-8') as index_file:
     index_file.write(formatted_html)
