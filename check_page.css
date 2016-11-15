@@ -42,8 +42,20 @@ th {
   text-align: left;
 }
 
+#sidebar table th, td {
+    padding: 0.25rem;
+}
+
 @media screen and (min-width: 50rem) {
   .wrapper {
     display: flex;
+  }
+
+  #sidebar {
+    padding: 1rem;
+    background-color: #EFF0F2;
+    min-width: 15rem;
+    max-width: 20rem;
+
   }
 }
