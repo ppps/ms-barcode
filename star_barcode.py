@@ -75,11 +75,14 @@ def date_to_sequence_and_week(date, price_codes):
     """Return sequence code and ISO week number for date
 
     Takes a datetime object and a list of integers representing price
-    codes and returns the two-digit ISSN sequence and ISO week number.
+    codes and returns the ISSN sequence and ISO week number as integers.
 
-    The sequence is a two-digit integer, where the first digit is the
-    price code and the second is the ISO weekday. For example, given
-    the sequence 21:
+
+    The sequence is an integer 1-7 … 91-97, where the tens position is
+    the price code and the units position the ISO weekday. Sequences
+    that run 1-7 have a price code of 0.
+
+    For example, given the sequence 21:
         2 is the price code
         1 is the ISO weekday
 
