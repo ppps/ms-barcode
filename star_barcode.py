@@ -23,7 +23,7 @@ from docopt import docopt
 BWIPP = Path(__file__).resolve().parent.joinpath('bwipp', 'barcode.ps')
 ISSN = '0307-1758'
 PRICE_CODES = [2, 2, 2, 2, 2, 3, 2]
-PRICES = [None, None, 1.0, 1.2]  # Indexed to price codes (0 & 1 not used)
+PRICES = [0.6, 0.8, 1.0, 1.2]  # Indexed to price codes
 
 
 def barcode_header(date, price):
