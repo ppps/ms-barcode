@@ -85,6 +85,28 @@ class TestFilename(unittest.TestCase):
             'Barcode_2016-W52-7_27.pdf'
             )
 
+    def test_price_code_0(self):
+        """barcode_filename should accept sequences 01-07
+
+        Sequences 01-07 are all represented by single-digit integers,
+        and should be properly zero-padded in the filename.
+
+        The range allowed here is deliberately shorter than elsewhere
+        in the program because barcode_filename is designed to work
+        only with a corresponding date, and ISO weekdays run 1-7.
+        Special-case sequences 00, 98 and 99 are not considered here.
+        """
+        start_date = datetime(2016, 11, 13)  # Note this is a Sunday, and
+                                       # must have timedelta added
+        for x in range(1, 7):
+            with self.subTest(x=x):
+                date = start_date + timedelta(x)
+                result = star_barcode.barcode_filename(date, x)
+                self.assertEqual(
+                    result.split('.')[0][-2:],
+                    '{0:02}'.format(x)
+                    )
+
 
 class TestDateToSequenceWeek(unittest.TestCase):
     """Test date_to_sequence_and_week
@@ -108,11 +130,19 @@ class TestDateToSequenceWeek(unittest.TestCase):
     It shouldn't be a requirement that the list is always length 7, just
     that it covers the publication weekdays.
 
-    The sequence is a two-digit integer, where the first digit is the
-    price code and the second is the ISO weekday. For example, given
+    The sequence returned is an integer 1-7 … 91-97 for simplicity.
+    When used, the sequence should be zero-padded to length 2
+    (but this is up to other functions).
+
+    As used, the sequence is a two-digit number, where the first digit is
+    the price code and the second is the ISO weekday. For example, given
     the sequence 21:
         2 is the price code
         1 is the ISO weekday
+
+    While sequences 0, 8, 9 … 90, 98, 99 are valid, they are not returned
+    by this function as it operates on dates, for which ISO weekdays run
+    1-7 for Monday-Sunday.
     """
 
     def test_standard_seq_week(self):
@@ -250,22 +280,76 @@ class TestPostscript(unittest.TestCase):
                         header_line=''
                         )
 
-    def test_sequence_wrong(self):
-        """construct_postscript raises ValueError if sequence is not 2 digits
+    def test_sequence_outside_range(self):
+        """construct_postscript raises ValueError if sequence outside range
 
-        The second digit of the sequence should be the ISO date but this
-        is not checked here (in case there's some case in the future where
-        we have to use an unusual sequence).
+        Sequence can be between 00 and 99. Although in our usage the
+        second digit is the ISO weekday, so in practice limited 01-07 and
+        91-97, special sequences may require the extra numbers.
+
+        Must not raise for sequences 00-09, represented by integers 0-9,
+        as these are valid sequences (and should be padded as such),
+        tested separately.
         """
-        seq = 215
-        with self.assertRaisesRegex(ValueError, str(seq)):
-            star_barcode.construct_postscript(
-                sequence=seq,
-                bwipp_location=self.bwipp,
-                issn=self.issn,
-                week=46,
-                header_line=''
-                )
+        seqs = [-1, 100]
+        for seq in seqs:
+            with self.subTest(seq=seq):
+                with self.assertRaisesRegex(ValueError, str(seq)):
+                    star_barcode.construct_postscript(
+                        sequence=seq,
+                        bwipp_location=self.bwipp,
+                        issn=self.issn,
+                        week=46,
+                        header_line=''
+                        )
+
+    def test_sequence_0_to_9(self):
+        """construct_postscript must not raise for sequences 00-09
+
+        As all possible sequences run 00-99, they can be adequately
+        represented by an integer rather than a string. But the
+        construct_postscript function must not raise for integers
+        0-9, even though as (unformatted) strings they are of length 1.
+        """
+        seqs = list(range(10))
+        for seq in seqs:
+            with self.subTest(seq=seq):
+                result = star_barcode.construct_postscript(
+                    sequence=seq,
+                    bwipp_location=self.bwipp,
+                    issn=self.issn,
+                    week=20,
+                    header_line=''
+                    )
+                self.assertGreater(
+                    result.find('{0} {1:02}'.format(self.issn, seq)),
+                    -1
+                    )
+
+    def test_sequence_specials(self):
+        """construct_postscript must not raise for special sequences
+
+        While the paper only uses sequences 01-07 through 91-97, the
+        missing numbers are valid (00, 08, 09 … 90, 98, 99) and should
+        be accepted by construct_postscript.
+        """
+        special_digits = [0, 8, 9]
+        for t in range(0, 10):
+            for special in special_digits:
+                seq = t * 10 + special
+            with self.subTest(seq=seq):
+                result = star_barcode.construct_postscript(
+                    sequence=seq,
+                    bwipp_location=self.bwipp,
+                    issn=self.issn,
+                    week=20,
+                    header_line=''
+                    )
+                self.assertGreater(
+                    result.find('{0} {1:02}'.format(self.issn, seq)),
+                    -1
+                    )
+
 
     def test_week_wrong(self):
         """construct_postscript raises ValueError if 0 < week < 54
@@ -284,6 +368,24 @@ class TestPostscript(unittest.TestCase):
                         header_line=''
                         )
 
+    def test_week_in_range(self):
+        """construct_postscript accepts week >= 1, <= 53"""
+        weeks = list(range(1, 54))
+        seq = 21
+        for week in weeks:
+            with self.subTest(week=week):
+                result = star_barcode.construct_postscript(
+                    week=week,
+                    bwipp_location=self.bwipp,
+                    issn=self.issn,
+                    sequence=seq,
+                    header_line=''
+                    )
+                self.assertGreater(
+                    result.find('{0} {1:02} {2:02}'.format(
+                        self.issn, seq, week)),
+                    -1
+                    )
 
 class TestCreateBarcode(unittest.TestCase):
     """Test create_barcode function, which calls ghostscript to make file"""
