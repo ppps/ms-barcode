@@ -36,7 +36,7 @@ table_rows = [
 
 template_path = str(Path(__file__).parent.joinpath('check_page.html'))
 
-with open('check_page.html', encoding='utf-8') as template_file:
+with open(template_path, encoding='utf-8') as template_file:
     html_template = template_file.read()
 
 formatted_html = html_template.format(
