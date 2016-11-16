@@ -17,7 +17,7 @@ tomorrow = datetime.today() + timedelta(1)
 barcode_path = star_barcode.barcode_from_date(
     date=tomorrow, output_dir=directory)
 week, sequence = re.search(r'Barcode_\d{4}-W(\d{2})-\d{1}_(\d{2}).pdf',
-                           'Barcode_2016-W46-3_23.pdf').groups()
+                           barcode_path.name).groups()
 
 tr_template = '''\
     <tr>
