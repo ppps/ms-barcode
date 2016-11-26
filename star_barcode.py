@@ -179,8 +179,7 @@ def create_barcode(postscript, output_file):
         '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
         '-'
         ]
-    with subprocess.Popen(gs_args, stdin=subprocess.PIPE) as proc:
-        proc.communicate(postscript.encode())
+    subprocess.run(args=gs_args, input=postscript.encode('utf-8'))
 
 
 def process_arguments(arguments):
