@@ -1,5 +1,5 @@
-set barcode_script to "PATH=/usr/local/bin:$PATH; /usr/bin/env python3 /Users/robjwells/Projects/star-barcode/star_barcode.py"
-set barcode_save_dir to "/Users/robjwells/Desktop/"
+set barcode_script to "PATH=/usr/local/bin:$PATH; /usr/bin/env python3 /Volumes/Server/Production\\ resources/Scripts/ms-barcode/star_barcode.py"
+set barcode_save_dir to "/Volumes/Server/Barcodes/"
 
 set barcode_options to {"Tomorrow", "Another date", "Special sequence"}
 set default_barcode to {"Tomorrow"}
