@@ -7,7 +7,7 @@ set choice_message to "Which barcode do you want to create?"
 set dialog_title to "Star Barcode"
 
 set barcode_choice to (choose from list barcode_options default items default_barcode with prompt choice_message with title dialog_title) as string
-if result is false then error number -128
+if result is "false" then error number -128
 
 if barcode_choice is in {"Tomorrow", "Another date"} then
     if barcode_choice is "Another date" then
@@ -29,7 +29,7 @@ set barcode_file_location to ((do shell script barcode_command) as POSIX file)
 
 tell application "Adobe InDesign CS4"
     tell the active document
-        place barcode_file_location on page item "Barcode"
+        place barcode_file_location on page item "Barcode" of page 1
         activate
     end tell
 end tell
