@@ -176,6 +176,7 @@ def create_barcode(postscript, output_file):
         '-sOutputFile={}'.format(output_file),
         '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
         '-sDEVICE=pdfwrite',
+        '-dCompatibilityLevel=1.3',
         '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
         '-'
         ]
