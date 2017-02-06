@@ -29,7 +29,10 @@ set barcode_file_location to ((do shell script barcode_command) as POSIX file)
 
 tell application "Adobe InDesign CS4"
     tell the active document
-        place barcode_file_location on page item "Barcode" of page 1
+        set place_result to place barcode_file_location on page item "Barcode" of page 1
+        set barcode_on_page to item 1 of place_result
+        unlink the item link of barcode_on_page -- embed the barcode image file
+        save
         activate
     end tell
 end tell
