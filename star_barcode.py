@@ -177,7 +177,7 @@ def create_barcode(postscript, output_file):
         '-dDEVICEWIDTHPOINTS=142', '-dDEVICEHEIGHTPOINTS=93',
         '-sDEVICE=pdfwrite',
         '-dPDFX',
-        '-sDSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
+        '-dNOSAFER', '-sBATCH', '-sNOPAUSE', '-dQUIET',
         '-'
         ]
     subprocess.run(args=gs_args, input=postscript.encode('utf-8'))
