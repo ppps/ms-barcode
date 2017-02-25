@@ -105,7 +105,7 @@ class TestFilename(unittest.TestCase):
                 result = star_barcode.barcode_filename(date, x)
                 self.assertEqual(
                     result.split('.')[0][-2:],
-                    '{0:02}'.format(x)
+                    f'{x:02}'
                     )
 
 
@@ -323,7 +323,7 @@ class TestPostscript(unittest.TestCase):
                     header_line=''
                     )
                 self.assertGreater(
-                    result.find('{0} {1:02}'.format(self.issn, seq)),
+                    result.find(f'{self.issn} {seq:02}'),
                     -1
                     )
 
@@ -347,7 +347,7 @@ class TestPostscript(unittest.TestCase):
                     header_line=''
                     )
                 self.assertGreater(
-                    result.find('{0} {1:02}'.format(self.issn, seq)),
+                    result.find(f'{self.issn} {seq:02}'),
                     -1
                     )
 
@@ -382,8 +382,7 @@ class TestPostscript(unittest.TestCase):
                     header_line=''
                     )
                 self.assertGreater(
-                    result.find('{0} {1:02} {2:02}'.format(
-                        self.issn, seq, week)),
+                    result.find(f'{self.issn} {seq:02} {week:02}'),
                     -1
                     )
 
